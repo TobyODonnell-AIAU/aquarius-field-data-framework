@@ -46,39 +46,17 @@
   <ItemGroup>
     <ProjectReference Include="..\FieldDataPluginFramework.Serialization\FieldDataPluginFramework.Serialization.csproj" />
   </ItemGroup>
+  <PropertyGroup>
+    <PluginPackagerExe Condition="'$(TargetFramework)' == 'net472'">$(SolutionDir)PluginPackager\bin\$(Configuration)\net472\PluginPackager.exe</PluginPackagerExe>
+    <PluginPackagerExe Condition="'$(TargetFramework)' == 'net10.0'">$(SolutionDir)PluginPackager\bin\$(Configuration)\net10.0\PluginPackager.exe</PluginPackagerExe>
+    <PluginTesterExe Condition="'$(TargetFramework)' == 'net472'">$(SolutionDir)PluginTester\bin\$(Configuration)\net472\PluginTester.exe</PluginTesterExe>
+    <PluginTesterExe Condition="'$(TargetFramework)' == 'net10.0'">$(SolutionDir)PluginTester\bin\$(Configuration)\net10.0\PluginTester.exe</PluginTesterExe>
+    <PackagedPluginName Condition="'$(TargetFramework)' == 'net472'">$(AssemblyName).plugin</PackagedPluginName>
+    <PackagedPluginName Condition="'$(TargetFramework)' == 'net10.0'">$(AssemblyName)-net10.plugin</PackagedPluginName>
+  </PropertyGroup>
 
-  <!-- net472: PluginPackager.exe/PluginTester.exe are net472-only tools that load the plugin assembly
-       via reflection in-process, so they can only package/test the net472 build.
-       Guarded by Exists() so building this project standalone (without building the whole solution
-       and its tool projects first) doesn't hard-fail. -->
-  <Target Name="PackageAndTestNet472Plugin" AfterTargets="Build" Condition="'$(TargetFramework)' == 'net472' And Exists('$(SolutionDir)PluginPackager\bin\$(Configuration)\PluginPackager.exe') And Exists('$(SolutionDir)PluginTester\bin\$(Configuration)\net472\PluginTester.exe')">
-    <Exec Command="&quot;$(SolutionDir)PluginPackager\bin\$(Configuration)\PluginPackager.exe&quot; &quot;$(TargetPath)&quot; /OutputPath=&quot;$(ProjectDir)deploy\$(Configuration)\$(TargetName).plugin&quot; /Exclude=*.json.json" />
-    <Exec Command="&quot;$(SolutionDir)PluginTester\bin\$(Configuration)\net472\PluginTester.exe&quot; /Plugin=&quot;$(TargetPath)&quot; /Data=&quot;$(ProjectDir)data\*.json&quot; /Json=&quot;$(TargetDir.TrimEnd('\'))&quot;" />
-  </Target>
-
-  <!-- net10.0: PluginPackager can't load a net10.0 assembly (net472 process), so stage the plugin
-       output plus a manifest.json (matching PluginPackager's schema) and zip it directly. -->
-  <Target Name="PackageNet10Plugin" AfterTargets="Build" Condition="'$(TargetFramework)' == 'net10.0'">
-    <PropertyGroup>
-      <Net10PluginStagingDir>$(IntermediateOutputPath)plugin-staging\</Net10PluginStagingDir>
-      <Net10PluginPackagePath>$(ProjectDir)deploy\$(Configuration)\$(TargetName)-net10.plugin</Net10PluginPackagePath>
-    </PropertyGroup>
-
-    <RemoveDir Directories="$(Net10PluginStagingDir)" Condition="Exists('$(Net10PluginStagingDir)')" />
-    <MakeDir Directories="$(Net10PluginStagingDir)" />
-    <MakeDir Directories="$(ProjectDir)deploy\$(Configuration)" />
-
-    <ItemGroup>
-      <Net10PluginOutputFiles Include="$(OutDir)**\*" />
-    </ItemGroup>
-    <Copy SourceFiles="@(Net10PluginOutputFiles)" DestinationFolder="$(Net10PluginStagingDir)%(RecursiveDir)" />
-
-    <WriteLinesToFile
-        File="$(Net10PluginStagingDir)manifest.json"
-        Lines="{&#xA;    &quot;AssemblyQualifiedTypeName&quot;: &quot;JsonFieldData.Plugin, JsonFieldData, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null&quot;,&#xA;    &quot;Description&quot;: &quot;The JsonFieldData plugin&quot;,&#xA;    &quot;PluginFolderName&quot;: &quot;JsonFieldData&quot;&#xA;}"
-        Overwrite="true" />
-
-    <Delete Files="$(Net10PluginPackagePath)" Condition="Exists('$(Net10PluginPackagePath)')" />
-    <ZipDirectory SourceDirectory="$(Net10PluginStagingDir)" DestinationFile="$(Net10PluginPackagePath)" Overwrite="true" />
+  <Target Name="PackageAndTestPlugin" AfterTargets="Build" Condition="Exists('$(PluginPackagerExe)') And Exists('$(PluginTesterExe)')">
+    <Exec Command="&quot;$(PluginPackagerExe)&quot; &quot;$(TargetPath)&quot; /OutputPath=&quot;$(ProjectDir)deploy\$(Configuration)\$(PackagedPluginName)&quot; /Exclude=*.json.json" />
+    <Exec Command="&quot;$(PluginTesterExe)&quot; /Plugin=&quot;$(TargetPath)&quot; /Data=&quot;$(ProjectDir)data\*.json&quot; /Json=&quot;$(TargetDir.TrimEnd('\'))&quot;" />
   </Target>
 </Project>
