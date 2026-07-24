@@ -1,81 +1,84 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
-<Project ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
-  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
-    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{C0F13B0D-0120-4A6C-BD39-147C4AFCC436}</ProjectGuid>
-    <OutputType>Library</OutputType>
-    <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>JsonFieldData</RootNamespace>
+    <TargetFrameworks>net472;net10.0</TargetFrameworks>
     <AssemblyName>JsonFieldData</AssemblyName>
-    <TargetFrameworkVersion>v4.7.2</TargetFrameworkVersion>
-    <FileAlignment>512</FileAlignment>
+    <RootNamespace>JsonFieldData</RootNamespace>
+    <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
     <Deterministic>true</Deterministic>
-    <TargetFrameworkProfile />
+    <CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
+    <!-- NU1702: FieldDataPluginFramework.dll is a net472-only assembly referenced directly during migration — expected and acceptable -->
+    <NoWarn>$(NoWarn);NU1702</NoWarn>
   </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
-    <DebugSymbols>true</DebugSymbols>
-    <DebugType>full</DebugType>
-    <Optimize>false</Optimize>
-    <OutputPath>bin\Debug\</OutputPath>
-    <DefineConstants>DEBUG;TRACE</DefineConstants>
-    <ErrorReport>prompt</ErrorReport>
-    <WarningLevel>4</WarningLevel>
+
+  <PropertyGroup Condition="'$(TargetFramework)' == 'net10.0'">
+    <LangVersion>latest</LangVersion>
   </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
-    <DebugType>pdbonly</DebugType>
-    <Optimize>true</Optimize>
-    <OutputPath>bin\Release\</OutputPath>
-    <DefineConstants>TRACE</DefineConstants>
-    <ErrorReport>prompt</ErrorReport>
-    <WarningLevel>4</WarningLevel>
-  </PropertyGroup>
+
   <ItemGroup>
-    <Reference Include="FieldDataPluginFramework, Version=2.0.0.0, Culture=neutral, processorArchitecture=AMD64">
-      <SpecificVersion>False</SpecificVersion>
+    <!-- 'Private' needed for net10 - FieldDataPluginFramework already loaded into the Default
+         AssemblyLoadContext, a second reference fails with an InvalidCastException. -->
+    <Reference Include="FieldDataPluginFramework" Condition="'$(TargetFramework)' == 'net10.0'">
+      <HintPath>..\Library\FieldDataPluginFramework.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+    <Reference Include="FieldDataPluginFramework" Condition="'$(TargetFramework)' == 'net472'">
       <HintPath>..\Library\FieldDataPluginFramework.dll</HintPath>
     </Reference>
-    <Reference Include="Microsoft.CSharp" />
-    <Reference Include="ServiceStack.Text, Version=6.0.0.0, Culture=neutral, PublicKeyToken=02c12cbda47e6587, processorArchitecture=MSIL">
-      <HintPath>..\packages\ServiceStack.Text.6.0.2\lib\net472\ServiceStack.Text.dll</HintPath>
-    </Reference>
-    <Reference Include="System" />
-    <Reference Include="System.Buffers, Version=4.0.3.0, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51, processorArchitecture=MSIL">
-      <HintPath>..\packages\System.Buffers.4.5.1\lib\net461\System.Buffers.dll</HintPath>
-    </Reference>
-    <Reference Include="System.Configuration" />
-    <Reference Include="System.Core" />
-    <Reference Include="System.Memory, Version=4.0.1.1, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51, processorArchitecture=MSIL">
-      <HintPath>..\packages\System.Memory.4.5.4\lib\net461\System.Memory.dll</HintPath>
-    </Reference>
-    <Reference Include="System.Numerics" />
-    <Reference Include="System.Numerics.Vectors, Version=4.1.4.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
-      <HintPath>..\packages\System.Numerics.Vectors.4.5.0\lib\net46\System.Numerics.Vectors.dll</HintPath>
-    </Reference>
-    <Reference Include="System.Runtime.CompilerServices.Unsafe, Version=4.0.4.1, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
-      <HintPath>..\packages\System.Runtime.CompilerServices.Unsafe.4.5.3\lib\net461\System.Runtime.CompilerServices.Unsafe.dll</HintPath>
-    </Reference>
   </ItemGroup>
+
   <ItemGroup>
-    <Compile Include="Parser.cs" />
-    <Compile Include="Plugin.cs" />
-    <Compile Include="Properties\AssemblyInfo.cs" />
+    <PackageReference Include="ServiceStack.Text" Version="10.0.4" />
   </ItemGroup>
+
+  <!-- net472-only polyfill packages — all of these are inbox on net10.0 -->
+  <ItemGroup Condition="'$(TargetFramework)' == 'net472'">
+    <PackageReference Include="System.Buffers" Version="4.6.1" />
+    <PackageReference Include="System.Memory" Version="4.6.3" />
+    <PackageReference Include="System.Numerics.Vectors" Version="4.6.1" />
+    <PackageReference Include="System.Runtime.CompilerServices.Unsafe" Version="6.1.2" />
+  </ItemGroup>
+
   <ItemGroup>
-    <None Include="packages.config" />
     <None Include="Readme.md" />
+    <None Include="data\**\*" />
   </ItemGroup>
+
   <ItemGroup>
-    <ProjectReference Include="..\FieldDataPluginFramework.Serialization\FieldDataPluginFramework.Serialization.csproj">
-      <Project>{b7f9d2ac-0ad5-4435-b3a6-e5e6b4c4877d}</Project>
-      <Name>FieldDataPluginFramework.Serialization</Name>
-    </ProjectReference>
+    <ProjectReference Include="..\FieldDataPluginFramework.Serialization\FieldDataPluginFramework.Serialization.csproj" />
   </ItemGroup>
-  <ItemGroup />
-  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
-  <PropertyGroup>
-    <PostBuildEvent>$(SolutionDir)PluginPackager\bin\$(Configuration)\PluginPackager.exe $(TargetPath) /OutputPath=$(ProjectDir)deploy\$(Configuration)\$(TargetName).plugin /Exclude=*.json.json
-$(SolutionDir)PluginTester\bin\$(Configuration)\PluginTester.exe /Plugin=$(TargetPath) /Data=$(ProjectDir)data\*.json /Json=$(TargetDir)</PostBuildEvent>
-  </PropertyGroup>
+
+  <!-- net472: PluginPackager.exe/PluginTester.exe are net472-only tools that load the plugin assembly
+       via reflection in-process, so they can only package/test the net472 build.
+       Guarded by Exists() so building this project standalone (without building the whole solution
+       and its tool projects first) doesn't hard-fail. -->
+  <Target Name="PackageAndTestNet472Plugin" AfterTargets="Build" Condition="'$(TargetFramework)' == 'net472' And Exists('$(SolutionDir)PluginPackager\bin\$(Configuration)\PluginPackager.exe') And Exists('$(SolutionDir)PluginTester\bin\$(Configuration)\net472\PluginTester.exe')">
+    <Exec Command="&quot;$(SolutionDir)PluginPackager\bin\$(Configuration)\PluginPackager.exe&quot; &quot;$(TargetPath)&quot; /OutputPath=&quot;$(ProjectDir)deploy\$(Configuration)\$(TargetName).plugin&quot; /Exclude=*.json.json" />
+    <Exec Command="&quot;$(SolutionDir)PluginTester\bin\$(Configuration)\net472\PluginTester.exe&quot; /Plugin=&quot;$(TargetPath)&quot; /Data=&quot;$(ProjectDir)data\*.json&quot; /Json=&quot;$(TargetDir.TrimEnd('\'))&quot;" />
+  </Target>
+
+  <!-- net10.0: PluginPackager can't load a net10.0 assembly (net472 process), so stage the plugin
+       output plus a manifest.json (matching PluginPackager's schema) and zip it directly. -->
+  <Target Name="PackageNet10Plugin" AfterTargets="Build" Condition="'$(TargetFramework)' == 'net10.0'">
+    <PropertyGroup>
+      <Net10PluginStagingDir>$(IntermediateOutputPath)plugin-staging\</Net10PluginStagingDir>
+      <Net10PluginPackagePath>$(ProjectDir)deploy\$(Configuration)\$(TargetName)-net10.plugin</Net10PluginPackagePath>
+    </PropertyGroup>
+
+    <RemoveDir Directories="$(Net10PluginStagingDir)" Condition="Exists('$(Net10PluginStagingDir)')" />
+    <MakeDir Directories="$(Net10PluginStagingDir)" />
+    <MakeDir Directories="$(ProjectDir)deploy\$(Configuration)" />
+
+    <ItemGroup>
+      <Net10PluginOutputFiles Include="$(OutDir)**\*" />
+    </ItemGroup>
+    <Copy SourceFiles="@(Net10PluginOutputFiles)" DestinationFolder="$(Net10PluginStagingDir)%(RecursiveDir)" />
+
+    <WriteLinesToFile
+        File="$(Net10PluginStagingDir)manifest.json"
+        Lines="{&#xA;    &quot;AssemblyQualifiedTypeName&quot;: &quot;JsonFieldData.Plugin, JsonFieldData, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null&quot;,&#xA;    &quot;Description&quot;: &quot;The JsonFieldData plugin&quot;,&#xA;    &quot;PluginFolderName&quot;: &quot;JsonFieldData&quot;&#xA;}"
+        Overwrite="true" />
+
+    <Delete Files="$(Net10PluginPackagePath)" Condition="Exists('$(Net10PluginPackagePath)')" />
+    <ZipDirectory SourceDirectory="$(Net10PluginStagingDir)" DestinationFile="$(Net10PluginPackagePath)" Overwrite="true" />
+  </Target>
 </Project>
