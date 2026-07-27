@@ -167,6 +167,8 @@ namespace Common
         private LoadedPlugin LoadPlugin(string path)
         {
 #if NETFRAMEWORK
+            path = Path.GetFullPath(path);
+
             if (IsZipPlugin(path))
                 return LoadPluginFromZip(path);
 

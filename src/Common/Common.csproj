@@ -14,7 +14,13 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Reference Include="FieldDataPluginFramework">
+    <!-- 'Private' needed for net10 - FieldDataPluginFramework already loaded into the Default
+         AssemblyLoadContext, a second reference fails with an InvalidCastException. -->
+    <Reference Include="FieldDataPluginFramework" Condition="'$(TargetFramework)' == 'net10.0'">
+      <HintPath>..\Library\FieldDataPluginFramework.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+    <Reference Include="FieldDataPluginFramework" Condition="'$(TargetFramework)' == 'net472'">
       <HintPath>..\Library\FieldDataPluginFramework.dll</HintPath>
     </Reference>
   </ItemGroup>

@@ -1,7 +1,7 @@
 {
   "Plugins": [
     {
-      "Path": "C:\\Projects\\aquarius-field-data-framework\\src\\JsonFieldData\\bin\\Debug\\net10.0\\JsonFieldData.dll"
+      "Path": "src\\JsonFieldData\\bin\\Debug\\net10.0\\JsonFieldData.dll"
     }
   ]
 }

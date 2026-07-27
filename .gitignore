@@ -10,6 +10,9 @@
 # Skip the deploy folder
 deploy/
 
+# Fody auto-generates this schema file on every build for XML IntelliSense
+FodyWeavers.xsd
+
 # User-specific files
 *.suo
 *.user
