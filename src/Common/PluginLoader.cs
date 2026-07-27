@@ -57,7 +57,7 @@ namespace Common
             public PluginManifest Manifest { get; }
             public string Path { get; }
             public int PluginPriority { get; set; }
-            public Dictionary<string,string> Settings { get; set; }
+            public Dictionary<string, string> Settings { get; set; }
         }
 
         public List<LoadedPlugin> LoadPlugins(List<string> paths)
@@ -82,11 +82,11 @@ namespace Common
         private Assembly ResolvePluginAssembliesFromSameFolder(object sender, ResolveEventArgs args)
         {
             var assemblyName = new AssemblyName(args.Name).Name + ".dll";
-            
+
             //A known issue where Humanizer is loading resources dll but actually we only need English which is embedded.
             if (assemblyName.Equals("Humanizer.resources.dll", StringComparison.OrdinalIgnoreCase))
             {
-	            return null;
+                return null;
             }
 
             var requestingAssembly = args.RequestingAssembly;
@@ -257,6 +257,12 @@ namespace Common
             Directory.CreateDirectory(extractDirectory);
             ZipFile.ExtractToDirectory(path, extractDirectory);
 
+            AppDomain.CurrentDomain.ProcessExit += (_, __) =>
+            {
+                try { Directory.Delete(extractDirectory, recursive: true); }
+                catch { /* best-effort cleanup */ }
+            };
+
             return extractDirectory;
         }
 
@@ -287,6 +293,7 @@ namespace Common
                 return byFolderName;
 
             return Directory.GetFiles(pluginDirectory, "*.dll", SearchOption.TopDirectoryOnly)
+                .OrderBy(p => p, StringComparer.OrdinalIgnoreCase)
                 .FirstOrDefault();
         }
 #endif
@@ -384,7 +391,7 @@ namespace Common
         private byte[] LoadAssemblyBytes(ZipArchiveEntry entry)
         {
             using (var stream = entry.Open())
-            using(var reader = new BinaryReader(stream))
+            using (var reader = new BinaryReader(stream))
             {
                 return reader.ReadBytes((int)entry.Length);
             }
