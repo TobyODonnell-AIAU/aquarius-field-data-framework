@@ -30,7 +30,7 @@ namespace Common
         {
             // First, probe the plugin directory. This ensures each plugin can ship its own
             // version of a dependency (e.g., Newtonsoft.Json) and get true side-by-side isolation.
-            var probedPath = Path.Combine(_pluginDirectory, assemblyName.Name + ".dll");
+            var probedPath = Path.Combine(_pluginDirectory, $"{assemblyName.Name}.dll");
             if (File.Exists(probedPath))
                 return LoadFromAssemblyPath(probedPath);
 

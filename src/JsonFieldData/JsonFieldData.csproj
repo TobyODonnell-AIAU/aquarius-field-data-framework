@@ -47,10 +47,8 @@
     <ProjectReference Include="..\FieldDataPluginFramework.Serialization\FieldDataPluginFramework.Serialization.csproj" />
   </ItemGroup>
   <PropertyGroup>
-    <PluginPackagerExe Condition="'$(TargetFramework)' == 'net472'">$(SolutionDir)PluginPackager\bin\$(Configuration)\net472\PluginPackager.exe</PluginPackagerExe>
-    <PluginPackagerExe Condition="'$(TargetFramework)' == 'net10.0'">$(SolutionDir)PluginPackager\bin\$(Configuration)\net10.0\PluginPackager.exe</PluginPackagerExe>
-    <PluginTesterExe Condition="'$(TargetFramework)' == 'net472'">$(SolutionDir)PluginTester\bin\$(Configuration)\net472\PluginTester.exe</PluginTesterExe>
-    <PluginTesterExe Condition="'$(TargetFramework)' == 'net10.0'">$(SolutionDir)PluginTester\bin\$(Configuration)\net10.0\PluginTester.exe</PluginTesterExe>
+    <PluginPackagerExe>$(SolutionDir)PluginPackager\bin\$(Configuration)\$(TargetFramework)\PluginPackager.exe</PluginPackagerExe>
+    <PluginTesterExe>$(SolutionDir)PluginTester\bin\$(Configuration)\$(TargetFramework)\PluginTester.exe</PluginTesterExe>
     <PackagedPluginName Condition="'$(TargetFramework)' == 'net472'">$(AssemblyName).plugin</PackagedPluginName>
     <PackagedPluginName Condition="'$(TargetFramework)' == 'net10.0'">$(AssemblyName)-net10.plugin</PackagedPluginName>
   </PropertyGroup>
