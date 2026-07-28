@@ -53,7 +53,8 @@
     <PackagedPluginName Condition="'$(TargetFramework)' == 'net10.0'">$(AssemblyName)-net10.plugin</PackagedPluginName>
   </PropertyGroup>
 
-  <Target Name="PackageAndTestPlugin" AfterTargets="Build" Condition="Exists('$(PluginPackagerExe)') And Exists('$(PluginTesterExe)')">
+  <!-- '$(TargetFramework)' != '' guards against the outer multi-targeting dispatch build running with an empty $(TargetPath). -->
+  <Target Name="PackageAndTestPlugin" AfterTargets="Build" Condition="'$(TargetFramework)' != '' And Exists('$(PluginPackagerExe)') And Exists('$(PluginTesterExe)')">
     <Exec Command="&quot;$(PluginPackagerExe)&quot; &quot;$(TargetPath)&quot; /OutputPath=&quot;$(ProjectDir)deploy\$(Configuration)\$(PackagedPluginName)&quot; /Exclude=*.json.json" />
     <Exec Command="&quot;$(PluginTesterExe)&quot; /Plugin=&quot;$(TargetPath)&quot; /Data=&quot;$(ProjectDir)data\*.json&quot; /Json=&quot;$(TargetDir.TrimEnd('\'))&quot;" />
   </Target>

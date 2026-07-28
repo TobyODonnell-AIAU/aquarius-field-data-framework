@@ -58,7 +58,8 @@
     <PackagedPluginName Condition="'$(TargetFramework)' == 'net10.0'">$(AssemblyName)-net10.plugin</PackagedPluginName>
   </PropertyGroup>
 
-  <Target Name="PackagePlugin" AfterTargets="Build" Condition="Exists('$(PluginPackagerExe)')">
+  <!-- '$(TargetFramework)' != '' guards against the outer multi-targeting dispatch build running with an empty $(TargetPath). -->
+  <Target Name="PackagePlugin" AfterTargets="Build" Condition="'$(TargetFramework)' != '' And Exists('$(PluginPackagerExe)')">
     <Exec Command="&quot;$(PluginPackagerExe)&quot; &quot;$(TargetPath)&quot; /OutputPath=&quot;$(ProjectDir)deploy\$(Configuration)\$(PackagedPluginName)&quot;" />
   </Target>
 
